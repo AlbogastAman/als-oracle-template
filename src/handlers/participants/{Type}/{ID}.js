@@ -30,16 +30,19 @@ module.exports = {
         var _type=request.params.Type;
         var _identifier=request.params.ID;
 
+        var response=null;
+
         const _result=Joi.validate({Type:_type,ID:_identifier},identifierSchema);
         if(_result.error===null){
             var accountNumber=_result.value.ID;
             var bankCode=accountNumber.substring(0,3);
             let participant=await _participant.getParticipant(bankCode);
             //Response
-            return h.response({"partyList":participant});
+            response={"partyList":participant};
         }else{
-            return h.response(_result.error.message);
+            response=_result.error.message;
         } 
+        return h.response(response);
     },
     /**
      * summary: Return participant information
