@@ -1,6 +1,19 @@
 'use strict';
 
 const Boom = require('boom');
+const _participant=require("../../../models/participants")
+const Joi=require('joi');
+require('dotenv').config();
+
+const _typeRegex=new RegExp(process.env.IdentifierTypeValue,'i');
+const _idRegex=new RegExp(process.env.IdentifierRegex,'i');
+
+
+const identifierSchema=Joi.object().keys({
+    Type:Joi.string().regex(_typeRegex).length(4).required(),
+    ID:Joi.string().regex(_idRegex).length(14).required()
+});
+
 
 /**
  * Operations on /participants/{Type}/{ID}
@@ -13,8 +26,20 @@ module.exports = {
      * produces: application/json
      * responses: 200, 400, 401, 403, 404, 405, 406, 501, 503
      */
-    get: function ParticipantsByTypeAndIDGet(request, h) {
-        return Boom.notImplemented();
+    get: async function ParticipantsByTypeAndIDGet(request, h) {
+        var _type=request.params.Type;
+        var _identifier=request.params.ID;
+
+        const _result=Joi.validate({Type:_type,ID:_identifier},identifierSchema);
+        if(_result.error===null){
+            var accountNumber=_result.value.ID;
+            var bankCode=accountNumber.substring(0,3);
+            let participant=await _participant.getParticipant(bankCode);
+            //Response
+            return h.response({"partyList":participant});
+        }else{
+            return h.response(_result.error.message);
+        } 
     },
     /**
      * summary: Return participant information
