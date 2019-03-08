@@ -38,7 +38,12 @@ module.exports = {
             var bankCode=accountNumber.substring(0,3);
             let participant=await _participant.getParticipant(bankCode);
             //Response
-            response={"partyList":participant};
+            if(participant===null){
+                response={"message":"Participant not found"};
+            }else{
+               response={"partyList":participant}; 
+            }
+            
         }else{
             response=_result.error.message;
         } 
